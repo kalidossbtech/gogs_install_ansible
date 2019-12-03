@@ -1,0 +1,68 @@
+---
+  - hosts: gogs
+ 
+    tasks:
+      - include_vars: file= vars/main.yml
+
+      - name: Include task list in play
+        include_tasks: tasks/main.yml
+      
+      - name: Reboot immediately if there was a change.
+        shell: "sleep 5 && systemctl reboot"
+        async: 1
+        poll: 0
+        when: system_updated #remove "not" if you want to restart 
+      
+      - name: Wait for the reboot to complete if there was a change.
+        wait_for_connection:
+          connect_timeout: 20
+          sleep: 5
+          delay: 5
+          timeout: 300
+        when: system_updated #remove "not" if you want to restart 
+
+      - name: Create database user with password and all database privileges and 'WITH GRANT OPTION'
+        mysql_user:
+          name: "{{ MYSQL_USER }}"
+          password: "{{ MYSQL_PASSWORD }}"
+          priv: '*.*:ALL,GRANT'
+          state: present
+      
+      
+      - name: Add the user gogs with home dir location /opt/gogs
+        user:
+          name: "{{ SYSTEM_USER }}"
+          comment: Gogs Admin User 
+          shell: /bin/bash
+          home: /opt/gogs
+
+      - name: Downloading the latest version of gogs server from github
+        unarchive:
+          src: "{{ GOGS_DOWNLOAD }}"
+          dest: /opt/gogs/
+          remote_src: yes
+
+      - name: Recursively change ownership of a directory /opt/gogs
+        file:
+          path: /opt/gogs
+          state: directory
+          recurse: yes
+          owner: "{{ SYSTEM_USER }}"
+          group: "{{ SYSTEM_USER }}"
+
+      - name: copy the gogs.service file 
+        template:
+          src: gogs.service
+          dest: /etc/systemd/system/
+          group: root
+          setype: root
+          mode: 0600
+
+      - name: start the gogs service, also issue daemon-reload to pick up config changes
+        systemd:
+          state: started
+          daemon_reload: yes
+          name: gogs
+            
+      
+      

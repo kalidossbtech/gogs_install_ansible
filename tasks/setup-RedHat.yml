@@ -1,0 +1,55 @@
+---
+- name: install the latest version of epel-release
+  yum: name="epel-release" state="latest"
+
+- name: Do something that requires a reboot when it results in a change.
+  yum: name=* state=latest
+  register: system_updated
+
+- name: Install a list of packages
+  yum:
+    name:
+      - wget
+      - mariadb-server
+      - python2-pip
+      - python2-PyMySQL
+      - mariadb
+      - git
+    state: present
+
+- name: Disable SELinux
+  selinux: state=disabled 
+
+# Install PyMySQL for Python 3.3 specifically,using the 'pip3' executable.
+- pip:
+    name: PyMySQL
+    #executable: pip3
+  when: ansible_python.version.major == 2
+    
+- name: ensure a list of packages installed
+  yum:
+    name: "{{ packages }}"
+  vars:
+    packages:
+    - wget
+    - mariadb-server
+    - python2-pip
+    - python2-PyMySQL
+    - mariadb
+    - git
+    - epel-release
+    - mariadb
+
+- name: Start and enable the mariadb service
+  service:
+    name: mariadb
+    state: started
+    enabled: yes
+
+- name: Create a new database with name 'gogs'
+  mysql_db:
+    name: gogs
+    state: present
+
+- name: adding port 3000 into firewalld 
+  firewalld: port="3000/tcp" permanent="yes"  state="enabled"

@@ -1,0 +1,9 @@
+---
+# vars file for gogs
+GOGS_DOWNLOAD: "https://github.com/gogs/gogs/releases/download/v0.11.91/linux_amd64.tar.gz"
+
+MYSQL_USER: "gogs"
+MYSQL_PASSWORD: "Admin@123"
+
+SYSTEM_USER: "gogs"
+
