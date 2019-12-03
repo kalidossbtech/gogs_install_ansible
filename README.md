@@ -24,12 +24,12 @@ A list of other roles hosted on Galaxy should go here, plus any details in regar
 
 Example Playbook
 ----------------
+Set your inventory and ansible.cfg file
 
-Including an example of how to use your role (for instance, with variables passed in as parameters) is always nice for users too:
+Run this playbook by :
 
-    - hosts: servers
-      roles:
-         - { role: kali.gogs, x: 42 }
+ansible-playbook install_gogs.yml
+
 
 License
 -------
@@ -39,4 +39,6 @@ BSD
 Author Information
 ------------------
 
-An optional section for the role authors to include contact information, or a website (HTML is not allowed).
+For more information 
+
+Contact : kalidossbtech@gmail.com
